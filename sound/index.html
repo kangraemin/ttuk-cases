@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>뚝 사운드 미리듣기</title>
+<style>
+:root{--bg:#17312c;--card:#1f3f39;--ink:#f4efe4;--sub:#b9c9c2;--mint:#8adfbf;--coral:#ff7a59;--line:#2f5650}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f4efe4;--card:#fff;--ink:#17312c;--sub:#4b635c;--mint:#1f8a68;--coral:#d4532f;--line:#ddd3c2}}
+:root[data-theme="dark"]{--bg:#17312c;--card:#1f3f39;--ink:#f4efe4;--sub:#b9c9c2;--mint:#8adfbf;--coral:#ff7a59;--line:#2f5650}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans KR",system-ui,sans-serif;padding:20px 16px 40px}
+main{max-width:560px;margin:0 auto}
+h1{font-size:22px;margin:0 0 4px}
+h2{font-size:16px;margin:22px 0 8px;color:var(--mint)}
+p{margin:0 0 4px;color:var(--sub)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.card b{display:block}
+.card span{color:var(--sub);font-size:13px}
+audio{width:100%;margin-top:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:left;cursor:pointer}
+button:active{border-color:var(--mint)}
+button small{display:block;color:var(--sub);font-size:12px}
+</style>
+</head>
+<body>
+<main>
+<h1>뚝 카이로 사운드 미리듣기</h1>
+<p>- 배경음 새 곡과 예전 곡을 비교해요.</p>
+<p>- 효과음은 게임과 같은 값으로 바로 울려요.</p>
+<p>- 뼈 소리 녹음은 그대로라 여기 없어요.</p>
+
+<h2>배경음</h2>
+<div class="card"><b>새 곡 · 칩튠 115초 반복</b><span>통통 튀는 진료실, 중간에 조가 한 번 튀어요</span><audio controls loop preload="none" src="bgm-new.mp3"></audio></div>
+<div class="card"><b>예전 곡</b><span>지금 게임에 들어 있는 곡</span><audio controls loop preload="none" src="bgm-old.mp3"></audio></div>
+
+<h2>효과음</h2>
+<div class="grid" id="sfx"></div>
+</main>
+<script type="module">
+import { zzfxSamples } from "./zzfx.js";
+let ac, master, noiseBuf;
+function init(){
+  if(ac) return;
+  ac = new (window.AudioContext || window.webkitAudioContext)();
+  master = ac.createGain(); master.gain.value = 0.9; master.connect(ac.destination);
+  noiseBuf = ac.createBuffer(1, Math.floor(ac.sampleRate*0.08), ac.sampleRate);
+  const d = noiseBuf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/d.length, 6);
+}
+function zz(params, vol = 1, delay = 0){
+  const d = zzfxSamples(ac.sampleRate, params), b = ac.createBuffer(1, d.length, ac.sampleRate); b.getChannelData(0).set(d);
+  const s = ac.createBufferSource(), g = ac.createGain(); s.buffer = b; g.gain.value = vol;
+  s.connect(g); g.connect(master); s.start(ac.currentTime + 0.005 + delay);
+}
+function tone(f1, f2, dur, type, vol, delay=0){
+  const t = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t+dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t+dur+0.02);
+}
+function pop(t, f, vol){
+  const src = ac.createBufferSource(); src.buffer = noiseBuf;
+  const hp = ac.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 2200;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol*0.7, t+0.001); g.gain.exponentialRampToValueAtTime(0.0001, t+0.025);
+  src.connect(hp); hp.connect(g); g.connect(master); src.start(t); src.stop(t+0.05);
+  const s2 = ac.createBufferSource(); s2.buffer = noiseBuf;
+  const bp = ac.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 6;
+  bp.frequency.setValueAtTime(f, t); bp.frequency.exponentialRampToValueAtTime(f*0.55, t+0.04);
+  const g2 = ac.createGain();
+  g2.gain.setValueAtTime(0.0001, t); g2.gain.exponentialRampToValueAtTime(vol, t+0.002); g2.gain.exponentialRampToValueAtTime(0.0001, t+0.06);
+  s2.connect(bp); bp.connect(g2); g2.connect(master); s2.start(t); s2.stop(t+0.08);
+  const o = ac.createOscillator(); o.type = "sine";
+  o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(65, t+0.06);
+  const og = ac.createGain(); og.gain.setValueAtTime(vol*0.6, t); og.gain.exponentialRampToValueAtTime(0.0001, t+0.08);
+  o.connect(og); og.connect(master); o.start(t); o.stop(t+0.1);
+}
+function boingOsc(){
+  const t = ac.currentTime + 0.01, o = ac.createOscillator(), g = ac.createGain(), lfo = ac.createOscillator(), lg = ac.createGain();
+  o.type = "sine";
+  o.frequency.setValueAtTime(230, t); o.frequency.exponentialRampToValueAtTime(720, t+0.07); o.frequency.exponentialRampToValueAtTime(170, t+0.55);
+  lfo.frequency.value = 18; lg.gain.value = 40; lfo.connect(lg); lg.connect(o.frequency);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.09, t+0.02); g.gain.exponentialRampToValueAtTime(0.0001, t+0.6);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t+0.62); lfo.start(t); lfo.stop(t+0.62);
+}
+function stretchOsc(){
+  const t = ac.currentTime + 0.01, o = ac.createOscillator(), g = ac.createGain(), lfo = ac.createOscillator(), lg = ac.createGain();
+  o.type = "triangle";
+  o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(560, t+0.55);
+  lfo.frequency.value = 11; lg.gain.value = 25; lfo.connect(lg); lg.connect(o.frequency);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.02, t+0.05); g.gain.exponentialRampToValueAtTime(0.0001, t+0.7);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t+0.72); lfo.start(t); lfo.stop(t+0.72);
+}
+const ZZ_DEFLATE = [1, 0, 330, .01, .18, .3, 2, 1, -.5, 0, 0, 0, .09, 0, 0, 0, 0, 1, 0, .5, 1200];
+const ZZ_BLIP = [1, 0, 2400, 0, 0, .04, 0, 1, -20];
+const ZZ_SPRING = [1, 0, 220, .01, .22, .3, 1, 1, 5, 0, 0, 0, .07, 0, 0, 0, 0, 1, 0, .3];
+const ZZ_WHISTLE = [1, 0, 140, .04, .45, .2, 0, 1, 1.7];
+const ZZ_THUMP = [1, 0, 80, 0, .05, .35, 1, 1, -1.5, 0, 0, 0, 0, .3, 0, 0, 0, 1, 0, 0, 500];
+const ZZ_SWISH = [1, 0, 900, .05, .08, .22, 0, 1, -4, 0, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 1200];
+const bell = f => [1, 0, f, .005, .05, .35, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, .07];
+const SFX = [
+  ["성공 띠링", "교정 성공", () => { zz(bell(1046), .1, .05); zz(bell(1318), .09, .16); }],
+  ["PERFECT 띠리링", "완벽 교정", () => { zz(bell(1046), .1, .05); zz(bell(1318), .09, .16); zz(bell(1568), .09, .27); zz(bell(2093), .07, .38); }],
+  ["뚜…륵?", "조금 빗나감", () => { pop(ac.currentTime + .01, 520, .28); zz(ZZ_DEFLATE, .06, .08); }],
+  ["손가락 뚝!", "많이 빗나감", () => { const t = ac.currentTime + .01; pop(t, 2600, .7); pop(t + .035, 3100, .45); zz(ZZ_BLIP, .08, .005); }],
+  ["뾰잉~", "한계 넘음", () => { zz(ZZ_SPRING, .07, .04); boingOsc(); }],
+  ["쭈우욱", "목뽑기 당김", () => { zz(ZZ_WHISTLE, .045); stretchOsc(); }],
+  ["꽈당 쿵", "치료사 넘어짐", () => { zz(ZZ_THUMP, .35); tone(110, 38, .38, "sine", .22); tone(70, 30, .5, "triangle", .12, .01); const t = ac.currentTime + .01; pop(t + .09, 260, .5); pop(t + .16, 900, .25); pop(t + .2, 1400, .18); }],
+  ["휙", "허리 모드 손 이동", () => { tone(900, 120, .35, "triangle", .05); zz(ZZ_SWISH, .12, .02); }],
+];
+const grid = document.getElementById("sfx");
+for(const [name, sub, fn] of SFX){
+  const b = document.createElement("button");
+  b.innerHTML = `${name}<small>${sub}</small>`;
+  b.onclick = () => { init(); if(ac.state !== "running") ac.resume(); fn(); };
+  grid.appendChild(b);
+}
+</script>
+</body>
+</html>
