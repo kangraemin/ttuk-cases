@@ -1,0 +1,1 @@
+export{t as MeshoptDecoder}from"./meshopt_decoder.module-_QCE5w-E.js";
