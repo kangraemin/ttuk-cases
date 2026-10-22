@@ -8,16 +8,16 @@
 <title>뚝 카이로 클리닉</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
-  <script type="module" crossorigin src="./assets/main-BdM7JGjc.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/motion-DA8pA4PA.js">
-  <link rel="modulepreload" crossorigin href="./assets/crack-BZFCS8Fy.js">
+  <script type="module" crossorigin src="./assets/main-v4tlSo8o.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/motion-BiAMqSPw.js">
+  <link rel="modulepreload" crossorigin href="./assets/crack-BCYxaUA5.js">
   <link rel="modulepreload" crossorigin href="./assets/three.module-CZoTlm9V.js">
   <link rel="modulepreload" crossorigin href="./assets/faceRig-H_vmjMAu.js">
-  <link rel="modulepreload" crossorigin href="./assets/orientation-zYkjEoB7.js">
+  <link rel="modulepreload" crossorigin href="./assets/orientation-BG7-X-pQ.js">
   <link rel="stylesheet" crossorigin href="./assets/motion-C0PA7bWs.css">
   <link rel="stylesheet" crossorigin href="./assets/crack-aduYGjtN.css">
   <link rel="stylesheet" crossorigin href="./assets/orientation-BWIYDX5w.css">
-  <link rel="stylesheet" crossorigin href="./assets/main-MFX6--oO.css">
+  <link rel="stylesheet" crossorigin href="./assets/main-BueDdalF.css">
 </head>
 <body>
 <div id="app" class="clinic-app">
@@ -203,7 +203,7 @@
 
   <div class="overlay" id="days" hidden>
     <div class="card days">
-      <div><div class="sub">영업 일지</div><div class="ch-tabs" id="chTabs"></div><p class="days-lead" id="chLead">월세 내는 날까지 버텨요</p></div>
+      <div><div class="sub">영업 일지</div><div class="ch-tabs" id="chTabs"></div><div class="lead-row"><p class="days-lead" id="chLead">월세 내는 날까지 버텨요</p><button class="ch-interlude" id="chInterlude" type="button" hidden>막간</button></div></div>
       <ol id="dayList"></ol>
       <div class="camp-row gated">
         <button class="btn ghost campaign-btn" id="daysNight" type="button" disabled hidden>심야 진료<small id="daysNightSub">56일 다 깨면 열려요</small></button>
@@ -236,6 +236,14 @@
       <button class="btn ghost" id="storyPain" type="button" hidden>광고 보고 통증 칸 +1</button>
       <button class="btn hard" id="storyHard" type="button" hidden>역경 모드 · 더 빡세게</button>
       <button class="btn ghost" id="storyBack" type="button">일지로</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="interlude" hidden>
+    <div class="card log story paper-note">
+      <div><div class="sub" id="interludeForm">막간</div><h2 id="interludeTitle">막간</h2></div>
+      <ul class="story-lines" id="interludeLines"></ul>
+      <button class="btn" id="interludeGo" type="button">다음</button>
     </div>
   </div>
 
