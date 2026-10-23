@@ -14,6 +14,7 @@ h1{font:400 26px/1.2 var(--f1);margin:4px 0 2px}
 .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .tabs::-webkit-scrollbar{display:none}
 .tabs+.tabs{margin-top:6px}
+#fl{align-items:center}#fl .cnt{margin:0 4px 0 0;flex:none}
 .chip{flex:none;font:600 13px var(--f2);padding:7px 13px;border-radius:99px;border:1px solid var(--line);background:var(--chip);color:var(--fg);cursor:pointer;white-space:nowrap}
 .chip.s{font-weight:400;font-size:12.5px;padding:5px 11px}
 .chip[aria-pressed=true]{background:var(--on);color:var(--onfg);border-color:var(--on)}
@@ -52,6 +53,7 @@ iframe{display:block;width:100%;height:100%;border:0}
 <div class="bar">
 <div class="tabs" id="fm"></div>
 <div class="tabs" id="fr"></div>
+<div class="tabs" id="fl"></div>
 </div>
 <div class="cnt" id="cnt"></div>
 <div class="grid" id="g"></div>
@@ -76,13 +78,16 @@ if(ok){var i=el("img");i.src=c.p;i.alt="";i.loading="lazy";th.appendChild(i);th.
 var bd=el("div","bd");bd.appendChild(el("span","t",c.title));var m=el("div","meta");if(!fm)m.appendChild(el("span","",c.modeName));m.appendChild(el("span","res "+c.result,c.resultName));if(c.patient)m.appendChild(el("span","",c.patient));bd.appendChild(m);
 b.appendChild(th);b.appendChild(bd);if(ok)b.onclick=function(){open(c)};g.appendChild(b)});
 document.getElementById("cnt").textContent=n+"개"}
+var LG="ko";try{LG=localStorage.getItem("caseLang")==="en"?"en":"ko"}catch(e){}
+function lang(){var h=document.getElementById("fl");h.textContent="";h.appendChild(el("span","cnt","게임 언어"));[["ko","한국어"],["en","English"]].forEach(function(p){var b=el("button","chip s",p[1]);b.lang=p[0];b.setAttribute("aria-pressed",String(LG===p[0]));b.onclick=function(){LG=p[0];try{localStorage.setItem("caseLang",LG)}catch(e){}lang()};h.appendChild(b)})}
+function src(c){return c.u+"&lang="+LG}
 var cur=null,obj=null,sh=document.getElementById("sh"),v=document.getElementById("v"),ve=document.getElementById("ve");
 function open(c){ve.hidden=true;document.getElementById("st").textContent=c.title;document.getElementById("sr").textContent=c.repro;document.getElementById("se").textContent=c.expect;
 var t=document.getElementById("stg");t.textContent="";[c.modeName,c.resultName,c.patient].concat(c.tags||[]).filter(function(x,i,a){return x&&a.indexOf(x)===i}).forEach(function(x){t.appendChild(el("span","tag",x))});
-cur=c;v.src=c.u;document.getElementById("vl").href=c.u;
+cur=c;v.src=src(c);document.getElementById("vl").href=src(c);
 sh.classList.add("on");sh.scrollTop=0;document.body.style.overflow="hidden";document.getElementById("sx").focus()}
 function close(){cur=null;v.src="about:blank";sh.classList.remove("on");document.body.style.overflow=""}
 document.getElementById("sx").onclick=close;document.addEventListener("keydown",function(e){if(e.key==="Escape"&&sh.classList.contains("on"))close()});
-tabs("fm",MODES,"",function(){return fm},function(x){fm=x});tabs("fr",RES," s",function(){return fr},function(x){fr=x});render();
+tabs("fm",MODES,"",function(){return fm},function(x){fm=x});tabs("fr",RES," s",function(){return fr},function(x){fr=x});render();lang();
 </script>
 </body></html>
