@@ -1,0 +1,1 @@
+var e=.62,t=.07,n=.15;function r(e){let r;if(e<=0||e>=.62)r=0;else if(e<t)r=-3*Math.sin(Math.PI/2*e/t);else if(e<n)r=-3+18*(1-(1-(e-t)/.07999999999999999)**3);else{let t=e-n,i=1-t/.47;r=15*Math.exp(-6.5*t)*Math.cos(2*Math.PI*3.2*t)*i*i}return{rot:r,bend:.35*r,push:Math.max(0,r/15)}}export{r as n,e as t};

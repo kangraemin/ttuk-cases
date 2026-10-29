@@ -1,0 +1,1 @@
+export{t as GLTFLoader}from"./GLTFLoader-CYH73d78.js";
